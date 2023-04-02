@@ -20,7 +20,6 @@ const Dashboard = () => {
   const [budgets, setBudgets] = useState([]);
   const [expenses, setExpenses] = useState([]);
 
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -46,31 +45,31 @@ const Dashboard = () => {
     return <Navigate to="/login" />;
   }
 
-return (
-  <Container maxWidth="md" className={classes.container}>
-    <Typography variant="h4" align="center">
-      Dashboard
-    </Typography>
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Paper className={classes.paper}>
-          <Typography variant="h6">Budgets:</Typography>
-          <ul>
-            {budgets.map((budget) => (
-              <li key={budget.id}>{budget.name}</li>
-            ))}
-          </ul>
-          <Typography variant="h6">Expenses:</Typography>
-          <ul>
-            {expenses.map((expense) => (
-              <li key={expense.id}>{expense.name}</li>
-            ))}
-          </ul>
-        </Paper>
+  return (
+    <Container maxWidth="md" className={classes.container}>
+      <Typography variant="h4" align="center">
+        Dashboard
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Paper className={classes.paper}>
+            <Typography variant="h6">Budgets:</Typography>
+            <ul>
+              {budgets.map((budget) => (
+                <li key={budget._id}>{budget.name}</li>
+              ))}
+            </ul>
+            <Typography variant="h6">Expenses:</Typography>
+            <ul>
+              {expenses.map((expense) => (
+                <li key={expense._id}>{expense.name}</li>
+              ))}
+            </ul>
+          </Paper>
+        </Grid>
       </Grid>
-    </Grid>
-  </Container>
-);
+    </Container>
+  );
 };
 
 export default Dashboard;

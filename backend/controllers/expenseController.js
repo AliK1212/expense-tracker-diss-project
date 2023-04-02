@@ -2,8 +2,6 @@ const Expense = require('../models/Expense');
 const jwt = require('jsonwebtoken');
 
 const getUserIdFromToken = (authorizationHeader) => {
-  console.log('Authorization header:', authorizationHeader);
-
   if (!authorizationHeader) {
     return null;
   }
@@ -17,8 +15,6 @@ const getUserIdFromToken = (authorizationHeader) => {
     return null;
   }
 };
-
-
 
 exports.getAllExpenses = async (req, res) => {
   try {
@@ -35,8 +31,6 @@ exports.getAllExpenses = async (req, res) => {
 };
 
 exports.createExpense = async (req, res) => {
-  console.log('Request headers:', req.headers);
-
   try {
     const userId = getUserIdFromToken(req.headers.authorization);
     if (!userId) {
@@ -55,7 +49,7 @@ exports.createExpense = async (req, res) => {
 
 exports.updateExpense = async (req, res) => {
   try {
-    const userId = getUserIdFromToken(req.headers.authorization.split(' ')[1]);
+    const userId = getUserIdFromToken(req.headers.authorization);
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
@@ -69,7 +63,7 @@ exports.updateExpense = async (req, res) => {
 
 exports.deleteExpense = async (req, res) => {
   try {
-    const userId = getUserIdFromToken(req.headers.authorization.split(' ')[1]);
+    const userId = getUserIdFromToken(req.headers.authorization);
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
@@ -78,5 +72,20 @@ exports.deleteExpense = async (req, res) => {
     res.status(200).json({ message: 'Expense deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting expense' });
+  }
+};
+
+exports.getCategories = async (req, res) => {
+  try {
+    const userId = getUserIdFromToken(req.headers.authorization);
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const expenses = await Expense.find({ user: userId });
+    const categories = [...new Set(expenses.map((expense) => expense.category))];
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching categories' });
   }
 };

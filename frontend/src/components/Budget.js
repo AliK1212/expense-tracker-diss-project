@@ -4,8 +4,9 @@ import { Navigate } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container, Typography, Paper, Grid } from '@material-ui/core';
 import BudgetList from './Lists/BudgetList';
-import { getBudget } from './services/budgetService';
-
+import BudgetForm from './BudgetForm';
+import { getBudget, createBudget, updateBudget, deleteBudget } from './services/budgetService';
+import { getAllExpenses } from './services/expenseService';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -21,16 +22,45 @@ const Budget = () => {
   const { user } = useContext(AuthContext);
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBudget, setSelectedBudget] = useState(null);
+  const [expenses, setExpenses] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await getBudget();
-      setBudgets(response.data);
+      setBudgets(response);
       setLoading(false);
+    };
+    const fetchExpenses = async () => {
+      const response = await getAllExpenses();
+      setExpenses(response);
     };
 
     fetchData();
+    fetchExpenses();
   }, []);
+
+  const handleCreateBudget = async (budget) => {
+    const newBudget = await createBudget(budget);
+    setBudgets([...budgets, newBudget]);
+  };
+
+  const handleUpdateBudget = async (id, updatedBudget) => {
+    const updated = await updateBudget(id, updatedBudget);
+    setBudgets(budgets.map((budget) => (budget._id === id ? updated : budget)));
+    setSelectedBudget(null);
+  };
+
+  const handleDeleteBudget = async (id) => {
+    await deleteBudget(id);
+    setBudgets(budgets.filter((budget) => budget._id !== id));
+  };
+
+  const totalExpensesByCategory = (category) => {
+    return expenses
+      .filter((expense) => expense.category === category)
+      .reduce((acc, curr) => acc + curr.amount, 0);
+  };
 
   if (!user) {
     return <Navigate to="/login" />;
@@ -44,10 +74,25 @@ const Budget = () => {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Paper className={classes.paper}>
+            <BudgetForm
+              onCreateBudget={handleCreateBudget}
+              onUpdateBudget={handleUpdateBudget}
+              selectedBudget={selectedBudget}
+            />
+          </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper className={classes.paper}>
             {loading ? (
               <Typography>Loading budgets...</Typography>
             ) : (
-              <BudgetList budgets={budgets} />
+              <BudgetList
+                budgets={budgets}
+                onEditBudget={setSelectedBudget}
+                onDeleteBudget={handleDeleteBudget}
+                totalExpensesByCategory={totalExpensesByCategory}
+
+              />
             )}
           </Paper>
         </Grid>

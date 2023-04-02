@@ -9,6 +9,7 @@ const getAuthHeaders = () => {
   };
 };
 
+
 export const getAllExpenses = async () => {
   const response = await axios.get(`${API_URL}/expenses`, { headers: getAuthHeaders() });
   return response.data;
@@ -27,3 +28,12 @@ export const updateExpense = async (id, updatedExpense) => {
 export const deleteExpense = async (id) => {
   await axios.delete(`${API_URL}/expenses/${id}`, { headers: getAuthHeaders() });
 };
+
+export const getCategories = async () => {
+  const response = await axios.get(`${API_URL}/expenses/categories`, {
+    headers: getAuthHeaders(),
+  });
+  return response.data;
+};
+
+

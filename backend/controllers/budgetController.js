@@ -31,6 +31,12 @@ exports.createBudget = async (req, res) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
+    const existingBudget = await Budget.findOne({ userId, category: req.body.category });
+
+    if (existingBudget) {
+      return res.status(400).json({ message: 'Budget for this category already exists' });
+    }
+
     const newBudget = new Budget({ ...req.body, userId });
     await newBudget.save();
     res.status(201).json(newBudget);
