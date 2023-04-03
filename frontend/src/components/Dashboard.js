@@ -1,9 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { Container, Typography, Grid, Paper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 import { AuthContext } from './context/AuthContext';
 import { Navigate } from 'react-router-dom';
+import ExpenseDistributionPieChart from './ExpenseDistributionPieChart';
+import BudgetInsights from './BudgetInsights';
+import TotalBudgetAmount from './TotalBudgetAmount';
+import TopExpenseCategories from './TopExpenseCategories';
+import SavingsPotential from './SavingsPotential';
+import BudgetHealth from './BudgetHealth';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -11,6 +17,12 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     padding: theme.spacing(2),
+  },
+  sectionTitle: {
+    paddingBottom: theme.spacing(2),
+  },
+  pieChartContainer: {
+    minHeight: '300px',
   },
 }));
 
@@ -41,30 +53,53 @@ const Dashboard = () => {
     fetchUserData();
   }, [user]);
 
+  const pieChartData = useMemo(() => {
+    const expenseData = expenses.reduce((acc, expense) => {
+      const index = acc.findIndex((item) => item.category === expense.category);
+  
+      if (index !== -1) {
+        acc[index].value += expense.amount;
+      } else {
+        acc.push({ category: expense.category, value: expense.amount });
+      }
+  
+      return acc;
+    }, []);
+  
+    return expenseData;
+  }, [expenses]);
+
   if (!user) {
     return <Navigate to="/login" />;
   }
 
   return (
     <Container maxWidth="md" className={classes.container}>
-      <Typography variant="h4" align="center">
+      <Typography variant="h4" align="center" className={classes.sectionTitle}>
         Dashboard
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Paper className={classes.paper}>
-            <Typography variant="h6">Budgets:</Typography>
+            <Typography variant="h6" className={classes.sectionTitle}>
+              Budgets Overview:
+            </Typography>
+            <TotalBudgetAmount budgets={budgets} />
+            <SavingsPotential budgets={budgets} expenses={expenses} />
+            <BudgetHealth budgets={budgets} expenses={expenses} />
             <ul>
               {budgets.map((budget) => (
                 <li key={budget._id}>{budget.name}</li>
               ))}
             </ul>
-            <Typography variant="h6">Expenses:</Typography>
-            <ul>
-              {expenses.map((expense) => (
-                <li key={expense._id}>{expense.name}</li>
-              ))}
-            </ul>
+            <Typography variant="h6" className={classes.sectionTitle}>
+              Expenses Distribution:
+            </Typography>
+            <TopExpenseCategories expenses={expenses} />
+            <div className={classes.pieChartContainer}>
+              <ExpenseDistributionPieChart data={pieChartData} />
+            </div>
+            <BudgetInsights budgets={budgets} expenses={expenses} />
           </Paper>
         </Grid>
       </Grid>

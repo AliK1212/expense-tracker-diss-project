@@ -1,14 +1,15 @@
 import React from 'react';
-import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Typography } from '@material-ui/core';
+import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Typography, LinearProgress } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 
-const BudgetList = ({ budgets, onEditBudget, onDeleteBudget, totalExpensesByCategory }) => {
+const BudgetList = ({ budgets, onEditBudget, onDeleteBudget, totalExpensesByCategory, averageMonthlyExpensesByCategory, percentageSpentByCategory }) => {
   return (
     <List>
       {budgets.map((budget) => {
         const totalExpenses = totalExpensesByCategory(budget.category);
         const overspent = totalExpenses > budget.amount;
+        const percentageSpent = percentageSpentByCategory(budget.category);
 
         return (
           <ListItem key={budget._id}>
@@ -23,8 +24,18 @@ const BudgetList = ({ budgets, onEditBudget, onDeleteBudget, totalExpensesByCate
                   >
                     {`Spent: $${totalExpenses}`}
                   </Typography>
-                  {` / Budget: $${budget.amount}`}
+                  {` / Budget: $${budget.amount} | Difference: $${(
+                    budget.amount - totalExpenses
+                  ).toFixed(2)} | Avg. Monthly Expenses: $${averageMonthlyExpensesByCategory(
+                    budget.category
+                  ).toFixed(2)} | Spent: ${percentageSpent}%`}
+                  <LinearProgress
+                    variant="determinate"
+                    value={overspent ? 100 : parseFloat(percentageSpent)}
+                    style={{ marginTop: 8 }}
+                  />
                 </React.Fragment>
+                
               }
             />
             <ListItemSecondaryAction>

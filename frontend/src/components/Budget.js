@@ -62,6 +62,32 @@ const Budget = () => {
       .reduce((acc, curr) => acc + curr.amount, 0);
   };
 
+  const averageMonthlyExpensesByCategory = (category) => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const filteredExpenses = expenses.filter(
+      (expense) =>
+        expense.category === category &&
+        new Date(expense.date).getFullYear() === currentYear &&
+        new Date(expense.date).getMonth() + 1 === currentMonth
+    );
+  
+    const totalExpenses = filteredExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+    return totalExpenses / currentMonth;
+  };
+
+  const percentageSpentByCategory = (category) => {
+    const totalExpenses = totalExpensesByCategory(category);
+    const budgetAmount = budgets.find((budget) => budget.category === category)?.amount || 0;
+  
+    if (budgetAmount === 0) {
+      return 0;
+    }
+    
+    return ((totalExpenses / budgetAmount) * 100).toFixed(2);
+  };
+
   if (!user) {
     return <Navigate to="/login" />;
   }
@@ -91,6 +117,8 @@ const Budget = () => {
                 onEditBudget={setSelectedBudget}
                 onDeleteBudget={handleDeleteBudget}
                 totalExpensesByCategory={totalExpensesByCategory}
+                averageMonthlyExpensesByCategory={averageMonthlyExpensesByCategory}
+                percentageSpentByCategory={percentageSpentByCategory}
 
               />
             )}
