@@ -2,6 +2,10 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 
 const ExpenseDistributionPieChart = ({ data }) => {
+  if (!data) {
+    return null;
+  }
+
   const chartData = {
     labels: data.map((item) => item.category),
     datasets: [
